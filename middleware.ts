@@ -1,6 +1,24 @@
-import { clerkMiddleware } from '@clerk/nextjs/server'
+import { NextFetchEvent, NextRequest, NextResponse } from 'next/server';
+import { clerkMiddleware } from '@clerk/nextjs/server';
 
-export default clerkMiddleware()
+const publicRoutes = [
+  '/',
+  '/about',
+  '/contact',
+  "/api/webhooks/clerk",
+];
+
+const customMiddleware = async (req: NextRequest, event: NextFetchEvent) => {
+  const url = req.nextUrl.pathname;
+
+  if (publicRoutes.includes(url)) {
+    return NextResponse.next();
+  }
+
+  return clerkMiddleware(req, event);
+};
+
+export default customMiddleware;
 
 export const config = {
   matcher: [
@@ -9,4 +27,4 @@ export const config = {
     // Always run for API routes
     '/(api|trpc)(.*)',
   ],
-}
+};
